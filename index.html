@@ -164,6 +164,7 @@ const CHEER=["没关系，看完解析你就会啦！","错一题没关系，金
 let order=[],cur=0,ansMap={},coins=0,combo=0,snd=true;
 let kidName=localStorage.getItem(KEY+".name")||"";
 const HOOK="https://open.feishu.cn/open-apis/bot/v2/hook/210ddde5-3e30-40bf-a097-94cd1e7ea5c9";
+const GROUP="【图灵杯初级组刷题】";
 function renderName(){
  const area=document.getElementById("nameArea");
  if(kidName){area.innerHTML=`<span class="nametag" onclick="askName()">👋 ${kidName} 小朋友 · 点击改名</span>`}
@@ -181,7 +182,7 @@ function sendFeishu(ok,total){
  st.style.display="block";st.style.background="#f0f4ff";st.style.color="#3355aa";
  st.textContent="📤 正在把成绩发到老师群...";
  fetch(HOOK,{method:"POST",headers:{"Content-Type":"application/json"},
-  body:JSON.stringify({msg_type:"text",content:{text:"【图灵杯刷题】"+text}})})
+  body:JSON.stringify({msg_type:"text",content:{text:GROUP+text}})})
  .then(r=>r.json()).then(()=>{st.style.background="#e6f7e9";st.style.color="#1d7a44";
   st.textContent="✅ 成绩已自动发到老师群： "+text})
  .catch(()=>{st.style.background="#fff3e0";st.style.color="#a06000";
