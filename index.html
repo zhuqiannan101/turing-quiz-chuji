@@ -211,8 +211,6 @@ function start(mode){
  cur=0;ansMap={};coins=0;combo=0;
  document.getElementById("coinN").textContent="0";
  show(["quiz"]);render();
- killPop("WELCOME!");
- fanfare();
 }
 function show(ids){for(const id of["home","quiz","ans","result"])document.getElementById(id).classList.toggle("hidden",!ids.includes(id));
  document.getElementById("homeIc").classList.toggle("hidden",!ids.some(i=>i!=="home"))}
