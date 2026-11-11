@@ -310,6 +310,9 @@ function pick(L){
    combo=0;wrong.add(order[cur]);saveWrong();beep(false);
  }
  render();
+ if(!ok){setTimeout(()=>{try{
+   if(ansMap[cur]!==undefined&&ansMap[cur]!==QUIZ[order[cur]].ans&&!document.getElementById("quiz").classList.contains("hidden"))showAns();
+  }catch(e){}},900)}
 }
 function showAns(){
  const q=QUIZ[order[cur]];
@@ -320,7 +323,26 @@ function showAns(){
  document.getElementById("aPoint").textContent="🎯 考点："+q.point;
  stopSpeak();
  const vb=document.getElementById("vidBox");vb.style.display="none";vb.innerHTML="";vb.dataset.src="";
+ const nb=document.getElementById("ansNextBtn");
+ const wrongAns=ansMap[cur]!==undefined&&ansMap[cur]!==q.ans;
  show(["ans"]);
+ if(wrongAns&&q.vid){
+   // 错题必须看讲解视频: 自动播放, 看完才能下一题
+   nb.disabled=true;nb.style.opacity=".45";nb.textContent="看完视频才能继续哦 👀";
+   const hint=document.getElementById("vidHint");
+   playVid();
+   const vd=vb.querySelector("video");
+   if(vd){vd.muted=false;
+     vd.onended=()=>{nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
+       if(hint)hint.textContent="✅ 讲解看完啦，记住这个知识点，点下一题继续吧！"};
+     vd.onerror=()=>{nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
+       if(hint)hint.textContent="⚠️ 视频加载失败，可以先点下一题继续～"};
+   }else{nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →"}
+ }else{
+   nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
+   const hint=document.getElementById("vidHint");
+   if(hint)hint.textContent="老师录的专属讲解，想深入学习就点开看看～";
+ }
 }
 function next(){
  stopSpeak();
@@ -393,6 +415,7 @@ function playVid(){
  if(box.style.display==="block"&&box.dataset.src===q.vid){box.style.display="none";return}
  box.dataset.src=q.vid;box.style.display="block";
  box.innerHTML=`<video controls playsinline autoplay style="width:100%;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.15)" src="${q.vid}"></video><div class="vhint">💡 视频加载需要几秒，打不开的话多等一下或检查网络～</div>`;
+ try{box.scrollIntoView({behavior:"smooth",block:"center"})}catch(e){}
 }
 
 renderProg();renderName();
