@@ -126,7 +126,7 @@ h2.res{font-size:30px;text-align:center;margin-bottom:2px}
   <div class="fb" id="fb"></div>
   <div class="acts" id="acts">
     <button class="btn ghost" onclick="showAns()">📖 看解析</button>
-    <button class="btn" onclick="next()">下一题 →</button>
+    <button class="btn" id="quizNextBtn" onclick="next()">下一题 →</button>
   </div>
  </div>
 </div>
@@ -198,6 +198,7 @@ function sendFeishu(ok,total){
   st.textContent="⚠️ 自动发送失败，请手动发给老师： "+text});
 }
 let wrong=new Set(JSON.parse(localStorage.getItem(KEY+".wrong")||"[]"));
+let videoDone=new Set();
 function saveWrong(){localStorage.setItem(KEY+".wrong",JSON.stringify([...wrong]))}
 function shuffled(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function beep(ok){
@@ -257,7 +258,7 @@ function start(mode){
    order=shuffled([...wrong]).slice(0,15);
    if(!order.length){alert("错题本是空的，太厉害啦！🎉");return}
  }else order=shuffled([...QUIZ.keys()]).slice(0,15);
- cur=0;ansMap={};coins=0;combo=0;
+ cur=0;ansMap={};coins=0;combo=0;videoDone=new Set();
  document.getElementById("coinN").textContent="0";
  show(["quiz"]);render();
  killPop("WELCOME!");
@@ -294,6 +295,9 @@ function render(){
      ?`${PRAISE[Math.floor(Math.random()*PRAISE.length)]}${combo>=3?`<span class="combo">🔥 连对 ${combo} 题！</span>`:""}<span style="float:right">答对 +3 金币</span>`
      :`${CHEER[Math.floor(Math.random()*CHEER.length)]} <span style="float:right">正确答案：${q.ans}</span>`;
    document.getElementById("acts").style.display="flex";
+   const qnb=document.getElementById("quizNextBtn");
+   if(ansMap[cur]!==q.ans){qnb.textContent="🎬 看讲解视频";qnb.style.background="linear-gradient(135deg,#3CB371,#26A69A)"}
+   else{qnb.textContent="下一题 →";qnb.style.background=""}
  }else{fb.className="fb";document.getElementById("acts").style.display="none"; preload(cur+1)}
 }
 function pick(L){
@@ -310,9 +314,6 @@ function pick(L){
    combo=0;wrong.add(order[cur]);saveWrong();beep(false);
  }
  render();
- if(!ok){setTimeout(()=>{try{
-   if(ansMap[cur]!==undefined&&ansMap[cur]!==QUIZ[order[cur]].ans&&!document.getElementById("quiz").classList.contains("hidden"))showAns();
-  }catch(e){}},900)}
 }
 function showAns(){
  const q=QUIZ[order[cur]];
@@ -333,9 +334,9 @@ function showAns(){
    playVid();
    const vd=vb.querySelector("video");
    if(vd){vd.muted=false;
-     vd.onended=()=>{nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
+     vd.onended=()=>{videoDone.add(order[cur]);nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
        if(hint)hint.textContent="✅ 讲解看完啦，记住这个知识点，点下一题继续吧！"};
-     vd.onerror=()=>{nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
+     vd.onerror=()=>{videoDone.add(order[cur]);nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
        if(hint)hint.textContent="⚠️ 视频加载失败，可以先点下一题继续～"};
    }else{nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →"}
  }else{
@@ -346,6 +347,10 @@ function showAns(){
 }
 function next(){
  stopSpeak();
+ // 答错的题: 必须先看完讲解视频才能进入下一题
+ if(ansMap[cur]!==undefined&&ansMap[cur]!==QUIZ[order[cur]].ans&&!videoDone.has(order[cur])){
+   showAns();return;
+ }
  const vb=document.getElementById("vidBox");vb.style.display="none";vb.innerHTML="";vb.dataset.src="";
  cur++;
  if(cur>=order.length){result();return}
