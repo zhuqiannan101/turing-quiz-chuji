@@ -133,13 +133,13 @@ h2.res{font-size:30px;text-align:center;margin-bottom:2px}
 <div id="ans" class="hidden">
  <div class="card">
   <div class="topbar"><span class="plate" id="aPlate"></span><span class="idx" id="aIdx"></span></div>
-  <div id="vidBox" style="margin-top:6px;display:none"></div>
+  <div style="text-align:center" id="vidOpt"><button class="btn vbtn" id="vidBtn" onclick="playVid()">🎬 看这题的讲解视频</button>
+   <div class="vhint" style="margin-top:6px">老师录的专属讲解，看完再点下一题哦～</div></div>
+  <div id="vidBox" style="margin-top:12px;display:none"></div>
   <div style="text-align:center;margin-top:14px"><button class="btn" id="ansNextBtn" onclick="next()">下一题 →</button>
    <div class="vhint" id="vidHint"></div></div>
-  <img class="aimg" id="aImg" alt="解析" style="margin-top:16px">
-  <div style="text-align:center"><span class="point" id="aPoint"></span></div>
-  <div style="text-align:center;margin-top:16px" id="vidOpt"><button class="btn vbtn" id="vidBtn" onclick="playVid()">🎬 再看一遍讲解视频</button></div>
  </div>
+</div>
 </div>
 <div id="result" class="hidden">
  <div class="card" style="text-align:center">
@@ -320,8 +320,6 @@ function showAns(){
  document.getElementById("aPlate").textContent=q.plate;
  document.getElementById("aPlate").style.background=q.color;
  document.getElementById("aIdx").textContent=`第 ${cur+1} / ${order.length} 关`;
- document.getElementById("aImg").src=q.a;
- document.getElementById("aPoint").textContent="🎯 考点："+q.point;
  stopSpeak();
  const vb=document.getElementById("vidBox");vb.style.display="none";vb.innerHTML="";vb.dataset.src="";
  const nb=document.getElementById("ansNextBtn");
@@ -343,9 +341,7 @@ function showAns(){
        if(hint)hint.textContent="⚠️ 视频加载失败，先继续做下一题吧～"};}
    else unlock();
  }else{
-   if(vo){vo.style.display=(q.vid?"block":"none");
-     const vb2=document.getElementById("vidBtn");
-     if(vb2)vb2.textContent="🎬 看这题的讲解视频";}
+   if(vo)vo.style.display=(q.vid?"block":"none");
    if(hint)hint.textContent="";
  }
 }
