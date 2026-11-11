@@ -133,12 +133,12 @@ h2.res{font-size:30px;text-align:center;margin-bottom:2px}
 <div id="ans" class="hidden">
  <div class="card">
   <div class="topbar"><span class="plate" id="aPlate"></span><span class="idx" id="aIdx"></span></div>
-  <img class="aimg" id="aImg" alt="解析">
+  <div id="vidBox" style="margin-top:6px;display:none"></div>
+  <div style="text-align:center;margin-top:14px"><button class="btn" id="ansNextBtn" onclick="next()">下一题 →</button>
+   <div class="vhint" id="vidHint"></div></div>
+  <img class="aimg" id="aImg" alt="解析" style="margin-top:16px">
   <div style="text-align:center"><span class="point" id="aPoint"></span></div>
-  <div style="text-align:center;margin-top:16px"><button class="btn vbtn" id="vidBtn" onclick="playVid()">🎬 看这题的讲解视频</button>
-   <div class="vhint" id="vidHint">老师录的专属讲解，看完再点下一题哦～</div></div>
-  <div id="vidBox" style="margin-top:14px;display:none"></div>
-  <div style="text-align:center;margin-top:16px"><button class="btn" onclick="next()">下一题 →</button></div>
+  <div style="text-align:center;margin-top:16px" id="vidOpt"><button class="btn vbtn" id="vidBtn" onclick="playVid()">🎬 再看一遍讲解视频</button></div>
  </div>
 </div>
 <div id="result" class="hidden">
@@ -296,7 +296,7 @@ function render(){
      :`${CHEER[Math.floor(Math.random()*CHEER.length)]} <span style="float:right">正确答案：${q.ans}</span>`;
    document.getElementById("acts").style.display="flex";
    const qnb=document.getElementById("quizNextBtn");
-   if(ansMap[cur]!==q.ans){qnb.textContent="🎬 看讲解视频";qnb.style.background="linear-gradient(135deg,#3CB371,#26A69A)"}
+   if(ansMap[cur]!==q.ans){qnb.textContent="看讲解进入下一题";qnb.style.background="linear-gradient(135deg,#3CB371,#26A69A)"}
    else{qnb.textContent="下一题 →";qnb.style.background=""}
  }else{fb.className="fb";document.getElementById("acts").style.display="none"; preload(cur+1)}
 }
@@ -325,24 +325,28 @@ function showAns(){
  stopSpeak();
  const vb=document.getElementById("vidBox");vb.style.display="none";vb.innerHTML="";vb.dataset.src="";
  const nb=document.getElementById("ansNextBtn");
+ const vo=document.getElementById("vidOpt");
+ const hint=document.getElementById("vidHint");
  const wrongAns=ansMap[cur]!==undefined&&ansMap[cur]!==q.ans;
  show(["ans"]);
+ nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
  if(wrongAns&&q.vid){
-   // 错题必须看讲解视频: 自动播放, 看完才能下一题
-   nb.disabled=true;nb.style.opacity=".45";nb.textContent="看完视频才能继续哦 👀";
-   const hint=document.getElementById("vidHint");
+   if(vo)vo.style.display="none";
+   if(hint)hint.textContent="👀 看完讲解视频才能进入下一题哦";
+   nb.disabled=true;nb.style.opacity=".45";nb.textContent="看完视频才能进入下一题 👀";
    playVid();
    const vd=vb.querySelector("video");
-   if(vd){vd.muted=false;
-     vd.onended=()=>{videoDone.add(order[cur]);nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
-       if(hint)hint.textContent="✅ 讲解看完啦，记住这个知识点，点下一题继续吧！"};
+   const unlock=()=>{videoDone.add(order[cur]);nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
+     if(hint)hint.textContent="✅ 讲解看完啦，记住这个知识点！"};
+   if(vd){vd.muted=false;vd.onended=unlock;
      vd.onerror=()=>{videoDone.add(order[cur]);nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
-       if(hint)hint.textContent="⚠️ 视频加载失败，可以先点下一题继续～"};
-   }else{nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →"}
+       if(hint)hint.textContent="⚠️ 视频加载失败，先继续做下一题吧～"};}
+   else unlock();
  }else{
-   nb.disabled=false;nb.style.opacity="1";nb.textContent="下一题 →";
-   const hint=document.getElementById("vidHint");
-   if(hint)hint.textContent="老师录的专属讲解，想深入学习就点开看看～";
+   if(vo){vo.style.display=(q.vid?"block":"none");
+     const vb2=document.getElementById("vidBtn");
+     if(vb2)vb2.textContent="🎬 看这题的讲解视频";}
+   if(hint)hint.textContent="";
  }
 }
 function next(){
@@ -419,7 +423,7 @@ function playVid(){
  const box=document.getElementById("vidBox");
  if(box.style.display==="block"&&box.dataset.src===q.vid){box.style.display="none";return}
  box.dataset.src=q.vid;box.style.display="block";
- box.innerHTML=`<video controls playsinline autoplay style="width:100%;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.15)" src="${q.vid}"></video><div class="vhint">💡 视频加载需要几秒，打不开的话多等一下或检查网络～</div>`;
+ box.innerHTML=`<video controls playsinline autoplay style="width:100%;border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.15)" src="${q.vid}"></video>`;
  try{box.scrollIntoView({behavior:"smooth",block:"center"})}catch(e){}
 }
 
